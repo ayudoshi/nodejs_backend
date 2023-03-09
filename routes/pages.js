@@ -16,9 +16,17 @@ router.get('/profile',auth.loggedIn,(req,res)=>{
     }
 })
 
+router.get('/getData',auth.getData);
+
 router.post('/login',auth.login);
 
 router.post('/register',auth.register);
+
+router.put('/update',auth.update);
+
+router.patch('/updateName',auth.updateName);
+
+router.delete('/delete',auth.delete);
 
 
 module.exports=router;

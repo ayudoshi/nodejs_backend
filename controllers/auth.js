@@ -54,7 +54,7 @@ exports.login = async (req, res) => {
     }
     else {
         const token = jwt.sign({ id: values.id }, "ayush1234", {
-            expiresIn: 1000*60*60,
+            expiresIn: 1000 * 60 * 60,
         })
 
         const cookieOptions = {
@@ -77,17 +77,17 @@ exports.loggedIn = async (req, res, next) => {
 
         if (typeof header !== undefined) {
             const token = header.split(" ")[1];
-            const decoded=jwt.verify(token,"ayush1234");
+            const decoded = jwt.verify(token, "ayush1234");
 
-            let values=[];
-            values=  await register.findOne({ _id : decoded.id });
+            let values = [];
+            values = await register.findOne({ _id: decoded.id });
             // console.log(values);
 
-            if(values!==null){
-                res.name=values.name;
+            if (values !== null) {
+                res.name = values.name;
                 return next();
-            }else{
-                res.err="error in else";
+            } else {
+                res.err = "error in else";
                 return next();
             }
 
@@ -100,3 +100,50 @@ exports.loggedIn = async (req, res, next) => {
         next();
     }
 };
+
+// let data = {
+//         name: "Your name", lastName: "your name", age: 60, birthPlace: "lonand"
+//     }
+exports.getData=async(req,res)=>{
+    try{
+        let values=await register.findOne({email:req.body.email});
+        res.json(values);
+    }catch(err){
+        res.json(err);
+    }
+}
+
+exports.update = async(req, res) => {
+
+    try {
+        const updatedData = req.body;
+        let values = await register.findOne({ _id: updatedData._id });
+        delete updatedData._id;
+        let resp=await register.updateOne(values,updatedData);
+        res.json(resp);
+    } catch (err) {
+        res.json(err);
+    }
+};
+
+exports.updateName = async(req, res) => {
+
+    try {
+        const updatedName = req.body;
+        let values = await register.findOne({ _id: updatedName._id });
+        delete updatedName._id;
+        let resp=await register.updateOne(values,updatedName);
+        res.json(resp);
+    } catch (err) {
+        res.json(err);
+    }
+};
+
+exports.delete=async(req,res)=>{
+    try{
+        let resp=await register.findByIdAndDelete(req.body._id);
+        res.json(resp);
+    }catch(err){
+        res.json({error:err});
+    }
+}
