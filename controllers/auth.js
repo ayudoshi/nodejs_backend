@@ -4,36 +4,35 @@ const jwt = require('jsonwebtoken');
 
 
 
-exports.register = async (req, res) => {
+exports.register = async (data) => {
 
     let values = [];
 
     try {
-        values = await register.findOne({ "email": req.body.email });
+        values = await register.findOne({ "email": data.email });
     }
     catch (err) {
-        res.json({ status: "error", error: "Some error occured" });
+        return { status: "error", error: "Some error occured" };
     }
 
     if (values != null) {
-        res.json({ status: "error", error: "Email already registered" });
+        return{ status: "error", error: "Email already registered" };
     }
     else {
         const Register = new register({
-            name: req.body.name,
-            email: req.body.email,
-            phone: req.body.phone,
-            password: req.body.password
+            name: data.name,
+            email: data.email,
+            phone: data.phone,
+            password: data.password
         });
 
-        await Register.save()
-            .then(() => {
-                res.json({ success: "email registered sucessfully" });
-            })
-            .catch(err => {
-                res.json({ error: err });
-                process.exit(1);
-            });
+        let reponse = await Register.save()
+        if(reponse){
+            return{ status:"true",msg: "email registered sucessfully" };
+        }
+        else{
+            return{ status:"false",error: err };
+        }
 
     }
 
@@ -68,12 +67,9 @@ exports.login = async (req, res) => {
 
 };
 
-exports.loggedIn = async (req, res, next) => {
+exports.loggedIn = async (header) => {
 
     try {
-
-        const header = req.headers['authorization'];
-
 
         if (typeof header !== undefined) {
             const token = header.split(" ")[1];
@@ -81,23 +77,19 @@ exports.loggedIn = async (req, res, next) => {
 
             let values = [];
             values = await register.findOne({ _id: decoded.id });
-            // console.log(values);
 
             if (values !== null) {
-                res.name = values.name;
-                return next();
+                return { status: "success", success: "Welcome" };
             } else {
-                res.err = "error in else";
-                return next();
+                return { status: "error", error: "Unauthorizedd access" };
             }
 
         } else {
-            return next();
+            return { status: "false", success: "Unauthorized access" };
         }
 
-    } catch (error) {
-        res.err = "catch error";
-        next();
+    } catch (err) {
+        return { status: "error", error: err };
     }
 };
 
@@ -145,5 +137,16 @@ exports.delete=async(req,res)=>{
         res.json(resp);
     }catch(err){
         res.json({error:err});
+    }
+}
+
+exports.test=(req,res)=>{
+    try {
+        console.log(req.body);
+        register.updateOne({ name: req.body.name ,  where: req.body.email } ).then((resp)=>{
+            res.json(resp);
+        })
+    } catch (e) {
+        res.send('error');
     }
 }
